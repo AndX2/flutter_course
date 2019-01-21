@@ -5,10 +5,28 @@ import 'dart:async';
 import '../models/item_model.dart';
 import '../bloc/movies_bloc.dart';
 
-class MovieList extends StatelessWidget {
+class MovieList extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return _MovieListState();
+  }
+}
+
+class _MovieListState extends State<MovieList> {
+  @override
+  void initState() {
+    super.initState();
+    bloc.fetchAllMovies();
+  }
+
+  @override
+    void dispose() {
+      bloc.dispose();
+      super.dispose();
+    }
+
   @override
   Widget build(BuildContext context) {
-    bloc.fetchAllMovies();
     return Scaffold(
       appBar: AppBar(
         title: Text('Popular Movies'),
@@ -36,18 +54,21 @@ class MovieList extends StatelessWidget {
             // crossAxisSpacing: 8.0,
             childAspectRatio: 0.7),
         itemBuilder: (BuildContext context, int index) {
-          return Card(elevation: 8.0 ,child: GestureDetector(
-            child: imageNetworkWidgetWithErrorCatcher(() {
-              return Image.network(
-                'https://image.tmdb.org/t/p/w185${snapshot.data.results[index].posterPath}',
-                fit: BoxFit.cover,
-              );
-            }, context,
-                'https://image.tmdb.org/t/p/w185${snapshot.data.results[index].posterPath}'),
-            onTap: () {
-              print('Tap on index: $index');
-            },
-          ),);
+          return Card(
+            elevation: 8.0,
+            child: GestureDetector(
+              child: imageNetworkWidgetWithErrorCatcher(() {
+                return Image.network(
+                  'https://image.tmdb.org/t/p/w185${snapshot.data.results[index].posterPath}',
+                  fit: BoxFit.cover,
+                );
+              }, context,
+                  'https://image.tmdb.org/t/p/w185${snapshot.data.results[index].posterPath}'),
+              onTap: () {
+                print('Tap on index: $index');
+              },
+            ),
+          );
         });
   }
 

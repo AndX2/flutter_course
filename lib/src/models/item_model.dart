@@ -32,7 +32,7 @@ class _Result {
   int _voteCount;
   int _id;
   bool _video;
-  var _voteAverage;
+  double _voteAverage;
   String _title;
   double _popularity;
   String _posterPath;
@@ -48,7 +48,7 @@ class _Result {
     _voteCount = result['vote_count'];
     _id = result['id'];
     _video = result['video'];
-    _voteAverage = result['vote_average'];
+    _voteAverage = double.tryParse(result['vote_average'].toString());
     _title = result['title'];
     _popularity = double.tryParse(result['popularity'].toString());
     _posterPath = result['poster_path'];

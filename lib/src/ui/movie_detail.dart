@@ -1,4 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+
+import '../bloc/movie_detail_bloc_provider.dart';
+import '../models/trailer_model.dart';
 
 class MovieDetail extends StatefulWidget {
   final posterUrl;
@@ -38,6 +42,8 @@ class MovieDetailState extends State<MovieDetail> {
   final String voteAverage;
   final int movieId;
 
+  MovieDetailBloc bloc;
+
   MovieDetailState({
     this.title,
     this.posterUrl,
@@ -46,6 +52,19 @@ class MovieDetailState extends State<MovieDetail> {
     this.voteAverage,
     this.movieId,
   });
+
+  @override
+  void didChangeDependencies() {
+    bloc = MovieDetailBlocProvider.of(context);
+    bloc.fetchTrailersById(movieId);
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    bloc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,10 +130,80 @@ class MovieDetailState extends State<MovieDetail> {
                 ),
                 Container(margin: EdgeInsets.only(top: 8.0, bottom: 8.0)),
                 Text(description),
+                Container(margin: EdgeInsets.only(top: 8.0, bottom: 8.0)),
+                StreamBuilder(
+                  stream: bloc.movieTrailers,
+                  builder:
+                      (context, AsyncSnapshot<Future<TrailerModel>> snapshot) {
+                    if (snapshot.hasData) {
+                      return FutureBuilder(
+                        future: snapshot.data,
+                        builder: (context,
+                            AsyncSnapshot<TrailerModel> itemSnapShot) {
+                          if (itemSnapShot.hasData) {
+                            if (itemSnapShot.data.results.length > 0)
+                              return trailerLayout(itemSnapShot.data);
+                            else
+                              return noTrailer(itemSnapShot.data);
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        },
+                      );
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  },
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget noTrailer(TrailerModel data) {
+    return Center(
+      child: Container(
+        child: Text("No trailer available"),
+      ),
+    );
+  }
+
+  Widget trailerLayout(TrailerModel data) {
+    if (data.results.length > 1) {
+      return Row(
+        children: <Widget>[
+          trailerItem(data, 0),
+          trailerItem(data, 1),
+        ],
+      );
+    } else {
+      return Row(
+        children: <Widget>[
+          trailerItem(data, 0),
+        ],
+      );
+    }
+  }
+
+  trailerItem(TrailerModel data, int index) {
+    return Expanded(
+      child: Column(
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.all(5.0),
+            height: 100.0,
+            color: Colors.grey,
+            child: Center(child: Icon(Icons.play_circle_filled)),
+          ),
+          Text(
+            data.results[index].name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

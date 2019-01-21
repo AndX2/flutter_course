@@ -4,6 +4,8 @@ import 'dart:async';
 
 import '../models/item_model.dart';
 import '../bloc/movies_bloc.dart';
+import 'movie_detail.dart';
+import '../bloc/movie_detail_bloc_provider.dart';
 
 class MovieList extends StatefulWidget {
   @override
@@ -20,10 +22,10 @@ class _MovieListState extends State<MovieList> {
   }
 
   @override
-    void dispose() {
-      bloc.dispose();
-      super.dispose();
-    }
+  void dispose() {
+    bloc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +56,9 @@ class _MovieListState extends State<MovieList> {
             // crossAxisSpacing: 8.0,
             childAspectRatio: 0.7),
         itemBuilder: (BuildContext context, int index) {
-          return Card(
-            elevation: 8.0,
-            child: GestureDetector(
+          return GridTile(
+            child: InkResponse(
+              enableFeedback: true,
               child: imageNetworkWidgetWithErrorCatcher(() {
                 return Image.network(
                   'https://image.tmdb.org/t/p/w185${snapshot.data.results[index].posterPath}',
@@ -65,7 +67,7 @@ class _MovieListState extends State<MovieList> {
               }, context,
                   'https://image.tmdb.org/t/p/w185${snapshot.data.results[index].posterPath}'),
               onTap: () {
-                print('Tap on index: $index');
+                openDetailPage(snapshot.data, index);
               },
             ),
           );
@@ -83,5 +85,23 @@ class _MovieListState extends State<MovieList> {
             child: Text('No cover for this movie', maxLines: 2),
           )
         : function();
+  }
+
+  openDetailPage(ItemModel data, int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return MovieDetailBlocProvider(
+          child: MovieDetail(
+            title: data.results[index].title,
+            posterUrl: data.results[index].backdropPath,
+            description: data.results[index].overview,
+            releaseDate: data.results[index].releaseDate,
+            voteAverage: data.results[index].voteAverage.toString(),
+            movieId: data.results[index].id,
+          ),
+        );
+      }),
+    );
   }
 }

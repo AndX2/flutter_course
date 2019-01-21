@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
 import '../bloc/movie_detail_bloc_provider.dart';
 import '../models/trailer_model.dart';
 
@@ -192,11 +194,17 @@ class MovieDetailState extends State<MovieDetail> {
     return Expanded(
       child: Column(
         children: <Widget>[
-          Container(
-            margin: EdgeInsets.all(5.0),
-            height: 100.0,
-            color: Colors.grey,
-            child: Center(child: Icon(Icons.play_circle_filled)),
+          GestureDetector(
+            child: Container(
+              margin: EdgeInsets.all(5.0),
+              height: 100.0,
+              color: Colors.grey,
+              child: Center(child: Icon(Icons.play_circle_filled)),
+            ),
+            onTap: () {
+              print('on tap trailer youtu.be/${data.results[index].key}');
+              launchTrailerVideo(data.results[index].key);
+            },
           ),
           Text(
             data.results[index].name,
@@ -206,5 +214,14 @@ class MovieDetailState extends State<MovieDetail> {
         ],
       ),
     );
+  }
+
+  void launchTrailerVideo(String dataKey) async {
+    final url = 'https://youtu.be/$dataKey';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
